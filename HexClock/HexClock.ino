@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <RTClib.h>
+#include <Bounce2.h>
 
 //**********************************************************************
 // Constant data
@@ -36,6 +37,20 @@ const uint8_t g_hexfont[16] = {
   (uint8_t) ~(SEG_A|SEG_E|SEG_F|SEG_G),
 };
 
+// Port D (digital pins 0..7) drives the segment cathodes
+#define DIGIT_OUT  PORTD
+#define DIGIT_DDR  DDRD
+
+// The 4 lowest bits of port B (digital pins 8..11) 
+// drive the common anodes
+#define CA_OUT     PORTB
+#define CA_DDR     DDRB
+
+// Digital pins used for buttons
+#define SET_BTN    11
+#define HOUR_BTN   13
+#define MINUTE_BTN 14
+
 //**********************************************************************
 // Global variables
 //**********************************************************************
@@ -53,11 +68,6 @@ RTC_DS1307 rtc;
 // Functions
 //**********************************************************************
 
-// TODO: need to define variable for segment cathode outputs
-uint8_t DIGIT_OUT;
-
-
-
 // Update the LED displays based on current hours and minute
 void update_display() {
   static uint8_t update_count;
@@ -68,24 +78,24 @@ void update_display() {
   uint8_t which = update_count & 0x3;
   uint8_t val;
   switch (which) {
-  case 0: // left high
-    val = (PINC >> 4) & 0x0f;
-    PORTB = ~1;
+  case 0: // high digit of hour
+    val = (g_hour >> 4) & 0x0F;
+    CA_OUT = (~1) & 0x0F;
     DIGIT_OUT = g_hexfont[val];
     break;
-  case 1: // left low
-    val = PINC & 0x0f;
-    PORTB = ~2;
+  case 1: // low digit of hour
+    val = g_hour & 0x0F;
+    CA_OUT = (~2) & 0x0F;
     DIGIT_OUT = g_hexfont[val];
     break;
-  case 2: // right high
-    val = (PIND >> 4) & 0x0f;
-    PORTB = ~4;
+  case 2: // high digit of minute
+    val = (g_minute >> 4) & 0x0F;
+    CA_OUT = (~4) & 0x0F;
     DIGIT_OUT = g_hexfont[val];
     break;
-  case 3: // right low
-    val = PIND & 0x0f;
-    PORTB = ~8;
+  case 3: // low digit of minute
+    val = g_minute & 0x0F;
+    CA_OUT = (~8) & 0x0F;
     DIGIT_OUT = g_hexfont[val];
     break;
   }
@@ -121,6 +131,17 @@ void check_time() {
 void setup() {
   // put your setup code here, to run once:
 
+  // All bits of DIGIT_OUT are configured as outputs
+  DIGIT_DDR = 0xFF;
+
+  // The low 4 bits of CA_OUT are configured as outputs.
+  CA_DDR = 0x0F;
+
+  // Configure button inputs
+  pinMode(SET_BTN, INPUT_PULLUP);
+  pinMode(HOUR_BTN, INPUT_PULLUP);
+  pinMode(MINUTE_BTN, INPUT_PULLUP);
+
   while (!rtc.begin()) {
     // Couldn't find RTC?
   }
@@ -138,10 +159,16 @@ void setup() {
   OCR0A = 0xAF;
   TIMSK0 |= _BV(OCIE0A);
 
+  // Set the time according to the RTC
   update_time(rtc.now());
 }
 
 void loop() {
+  // Button states
+  uint8_t set_btn_pressed;
+  uint8_t hour_btn_pressed;
+  uint8_t minute_btn_pressed;
+  
   for (;;) {
     // The idea is to wait very close to 1 minute for
     // changes to the hour and minute.  The counter will
