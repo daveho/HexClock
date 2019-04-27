@@ -1,9 +1,9 @@
 (sym_lib_table
-  (lib (name arduino_nano)(type Legacy)(uri ${KIPRJMOD}/arduino_nano.lib)(options "")(descr ""))
   (lib (name device)(type Legacy)(uri ${KIPRJMOD}/device.lib)(options "")(descr ""))
   (lib (name Display_Character)(type Legacy)(uri ${KIPRJMOD}/Display_Character.lib)(options "")(descr ""))
   (lib (name Timer_RTC)(type Legacy)(uri ${KIPRJMOD}/Timer_RTC.lib)(options "")(descr ""))
   (lib (name power)(type Legacy)(uri ${KIPRJMOD}/power.lib)(options "")(descr ""))
   (lib (name Switch)(type Legacy)(uri ${KIPRJMOD}/Switch.lib)(options "")(descr ""))
   (lib (name Connector)(type Legacy)(uri ${KIPRJMOD}/Connector.lib)(options "")(descr ""))
+  (lib (name ARDUINO_NANO)(type Legacy)(uri ${KIPRJMOD}/ARDUINO_NANO.lib)(options "")(descr ""))
 )
