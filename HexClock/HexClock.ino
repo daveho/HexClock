@@ -41,10 +41,8 @@ const uint8_t g_hexfont[16] = {
 #define DIGIT_OUT  PORTD
 #define DIGIT_DDR  DDRD
 
-// The 4 lowest bits of port B (digital pins 8..11) 
-// drive the common anodes
-#define CA_OUT     PORTB
-#define CA_DDR     DDRB
+// Common anode control pins
+const uint8_t CA_PINS[] = { 8, 9, 10, 12 };
 
 // Digital pins used for buttons
 #define SET_BTN    11
@@ -80,22 +78,26 @@ void update_display() {
   switch (which) {
   case 0: // high digit of hour
     val = (g_hour >> 4) & 0x0F;
-    CA_OUT = (~1) & 0x0F;
+    digitalWrite(CA_PINS[3], HIGH);
+    digitalWrite(CA_PINS[0], LOW);
     DIGIT_OUT = g_hexfont[val];
     break;
   case 1: // low digit of hour
     val = g_hour & 0x0F;
-    CA_OUT = (~2) & 0x0F;
+    digitalWrite(CA_PINS[0], HIGH);
+    digitalWrite(CA_PINS[1], LOW);
     DIGIT_OUT = g_hexfont[val];
     break;
   case 2: // high digit of minute
     val = (g_minute >> 4) & 0x0F;
-    CA_OUT = (~4) & 0x0F;
+    digitalWrite(CA_PINS[1], HIGH);
+    digitalWrite(CA_PINS[2], LOW);
     DIGIT_OUT = g_hexfont[val];
     break;
   case 3: // low digit of minute
     val = g_minute & 0x0F;
-    CA_OUT = (~8) & 0x0F;
+    digitalWrite(CA_PINS[2], HIGH);
+    digitalWrite(CA_PINS[3], LOW);
     DIGIT_OUT = g_hexfont[val];
     break;
   }
@@ -134,8 +136,11 @@ void setup() {
   // All bits of DIGIT_OUT are configured as outputs
   DIGIT_DDR = 0xFF;
 
-  // The low 4 bits of CA_OUT are configured as outputs.
-  CA_DDR = 0x0F;
+  // Set up common anode control pins
+  for (uint8_t i = 0; i < 4; i++) {
+    pinMode(CA_PINS[i], OUTPUT);
+    digitalWrite(CA_PINS[i], HIGH);
+  }
 
   // Configure button inputs
   pinMode(SET_BTN, INPUT_PULLUP);
