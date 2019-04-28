@@ -175,12 +175,18 @@ void loop() {
   uint8_t minute_btn_pressed;
   
   for (;;) {
+    /*
     // The idea is to wait very close to 1 minute for
     // changes to the hour and minute.  The counter will
     // reset to 0 when an hour and/or minute change is
     // detected.
     uint16_t tick = g_count;
     if (tick >= 59936 && (tick & 0xF) == 0) {
+      check_time();
+    }
+    */
+    uint16_t tick = g_count;
+    if ((tick & 0xFF) == 0) {
       check_time();
     }
   }
