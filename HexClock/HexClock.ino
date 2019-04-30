@@ -7,13 +7,14 @@
 //**********************************************************************
 
 // Bits for display segments
-#define SEG_A (1<<0)
-#define SEG_B (1<<1)
-#define SEG_C (1<<2)
-#define SEG_D (1<<3)
-#define SEG_E (1<<4)
-#define SEG_F (1<<5)
-#define SEG_G (1<<6)
+#define SEG_A  (1<<0)
+#define SEG_B  (1<<1)
+#define SEG_C  (1<<2)
+#define SEG_D  (1<<3)
+#define SEG_E  (1<<4)
+#define SEG_F  (1<<5)
+#define SEG_G  (1<<6)
+#define SEG_DP (1<<7)
 
 // Bit patterns for hex digits 0-9, A-F.
 // They are negated because the high-side PNP transistors
@@ -66,6 +67,10 @@ RTC_DS1307 rtc;
 // Debouncing of pushbuttons
 Bounce set_btn, hour_btn, minute_btn;
 
+// State of 2nd display decimal point, which blinks
+// on/off at about .5 Hz.
+uint8_t blinker;
+
 //**********************************************************************
 // Functions
 //**********************************************************************
@@ -90,7 +95,7 @@ void update_display() {
     val = g_hour & 0x0F;
     digitalWrite(CA_PINS[0], HIGH);
     digitalWrite(CA_PINS[1], LOW);
-    DIGIT_OUT = g_hexfont[val];
+    DIGIT_OUT = g_hexfont[val] & (blinker ? ~SEG_DP : 0xFF);
     break;
   case 2: // high digit of minute
     val = (g_minute >> 4) & 0x0F;
@@ -164,6 +169,11 @@ void loop() {
   set_btn.update();
   hour_btn.update();
   minute_btn.update();
+
+  // Blink second display's decimal point at about .5 Hz
+  if ((count & 0x3FF) == 0) {
+    blinker = !blinker;
+  }
 
   // Check time periodically
   if ((count & 0x3F) == 0) {
