@@ -45,11 +45,6 @@ const uint8_t g_hexfont[16] = {
 // Common anode control pins
 const uint8_t CA_PINS[] = { 8, 9, 10, 12 };
 
-// Digital pins used for buttons
-#define SET_BTN    11
-#define HOUR_BTN   13
-#define MINUTE_BTN 14
-
 //**********************************************************************
 // Global variables
 //**********************************************************************
@@ -136,11 +131,6 @@ void setup() {
     pinMode(CA_PINS[i], OUTPUT);
     digitalWrite(CA_PINS[i], HIGH);
   }
-
-  // Configure button inputs
-  pinMode(SET_BTN, INPUT_PULLUP);
-  pinMode(HOUR_BTN, INPUT_PULLUP);
-  pinMode(MINUTE_BTN, INPUT_PULLUP);
 
   while (!rtc.begin()) {
     // Couldn't find RTC?
