@@ -57,10 +57,6 @@ const uint8_t CA_PINS[] = { 8, 9, 10, 12 };
 volatile uint8_t g_hour;
 volatile uint8_t g_minute;
 
-/*
-volatile uint16_t g_count;
-*/
-
 // Used for timing in the main loop
 uint16_t count = 0;
 
@@ -112,21 +108,6 @@ void update_display() {
   update_count++;
 }
 
-/*
-// Timer interrupt handler, called once per millisecond
-SIGNAL(TIMER0_COMPA_vect) {
-  uint16_t tick = g_count;
-  g_count = tick + 1;
-
-  // Update the LED displays periodically (at 250 Hz,
-  // which because we are driving the LED displays at
-  // 1/4 duty, means they are updated at 62.5 Hz individually)
-  if (((tick + 3) & 0x3) == 0) {
-    update_display();
-  }
-}
-*/
-
 void update_time(DateTime now) {
   g_hour = now.hour();
   g_minute = now.minute();
@@ -136,7 +117,6 @@ void check_time() {
   DateTime now = rtc.now();
   if (g_hour != now.hour() || g_minute != now.minute()) {
     update_time(now);
-//    g_count = 0; // reset counter so RTC reads will be deferred about 1 minute
   }
 }
 
@@ -161,9 +141,11 @@ void setup() {
     // Couldn't find RTC?
   }
 
+/*
   // Set initial time (this is just for testing)
   DateTime set(2019, 4, 30, 9, 23, 0);
   rtc.adjust(set);
+*/
 
   // Set the time according to the RTC
   update_time(rtc.now());
@@ -175,65 +157,50 @@ void setup() {
   hour_btn.interval(10);
   minute_btn.attach(A0, INPUT_PULLUP);
   minute_btn.interval(10);
-
-/*
-  // Add a timer interrupt handler to be fired once per millisecond.
-  // See: https://learn.adafruit.com/multi-tasking-the-arduino-part-2/timers
-  OCR0A = 0xAF;
-  TIMSK0 |= _BV(OCIE0A);
-*/
 }
 
 void loop() {
+  // Update button states
   set_btn.update();
   hour_btn.update();
   minute_btn.update();
-  
-    /*
-    // The idea is to wait very close to 1 minute for
-    // changes to the hour and minute.  The counter will
-    // reset to 0 when an hour and/or minute change is
-    // detected.
-    uint16_t tick = g_count;
-    if (tick >= 59936 && (tick & 0xF) == 0) {
-      check_time();
-    }
-    */
-    /*
-    uint16_t tick = g_count;
-    if ((tick & 0xFF) == 0) {
-      check_time();
-    }
-    */
-    
-    if ((count & 0x3F) == 0) {
-      check_time();
-    }
-    
-    if ((count & 0x1) == 0) {
-      update_display();
-    }
 
-    bool adjust = false;
-    if (hour_btn.fell() && !set_btn.read()) {
-      // Adjust hour
-      g_hour++;
-      if (g_hour >= 24) { g_hour = 0; }
-      adjust = true;
-    }
-    if (minute_btn.fell() && !set_btn.read()) {
-      // Adjust minute
-      g_minute++;
-      if (g_minute >= 60) { g_minute = 0; }
-      adjust = true;
-    }
-    if (adjust) {
-      DateTime cur = rtc.now();
-      DateTime adj(cur.year(), cur.month(), cur.day(), g_hour, g_minute, 0);
-      rtc.adjust(adj);
-    }
-    
-    delay(1);
-    
-    count++;
+  // Check time periodically
+  if ((count & 0x3F) == 0) {
+    check_time();
+  }
+
+  // Refresh display periodically
+  if ((count & 0x3) == 0) {
+    update_display();
+  }
+
+  // Check whether buttons are being used to adjust the time.
+  // All buttons are high when not pressed, and low when pressed.
+  // The set button must be pressed for the hour and minute
+  // adjust buttons to be used.
+  bool adjust = false;
+  if (hour_btn.fell() && !set_btn.read()) {
+    // Adjust hour
+    g_hour++;
+    if (g_hour >= 24) { g_hour = 0; }
+    adjust = true;
+  }
+  if (minute_btn.fell() && !set_btn.read()) {
+    // Adjust minute
+    g_minute++;
+    if (g_minute >= 60) { g_minute = 0; }
+    adjust = true;
+  }
+  if (adjust) {
+    // Time was changed, so update RTC
+    DateTime cur = rtc.now();
+    DateTime adj(cur.year(), cur.month(), cur.day(), g_hour, g_minute, 0);
+    rtc.adjust(adj);
+  }
+
+  // Delay 1 ms for timing
+  delay(1);
+  
+  count++;
 }
