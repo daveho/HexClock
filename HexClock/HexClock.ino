@@ -54,10 +54,12 @@ const uint8_t CA_PINS[] = { 8, 9, 10, 12 };
 //**********************************************************************
 
 // Variables for the time display
-uint8_t g_hour;
-uint8_t g_minute;
+volatile uint8_t g_hour;
+volatile uint8_t g_minute;
 
+/*
 volatile uint16_t g_count;
+*/
 
 // The RTC object (from RTClib)
 RTC_DS1307 rtc;
@@ -104,6 +106,7 @@ void update_display() {
   update_count++;
 }
 
+/*
 // Timer interrupt handler, called once per millisecond
 SIGNAL(TIMER0_COMPA_vect) {
   uint16_t tick = g_count;
@@ -116,6 +119,7 @@ SIGNAL(TIMER0_COMPA_vect) {
     update_display();
   }
 }
+*/
 
 void update_time(DateTime now) {
   g_hour = now.hour();
@@ -126,7 +130,7 @@ void check_time() {
   DateTime now = rtc.now();
   if (g_hour != now.hour() || g_minute != now.minute()) {
     update_time(now);
-    g_count = 0; // reset counter so RTC reads will be deferred about 1 minute
+//    g_count = 0; // reset counter so RTC reads will be deferred about 1 minute
   }
 }
 
@@ -151,21 +155,19 @@ void setup() {
     // Couldn't find RTC?
   }
 
-  // Initialize display variables
-  g_hour = 0;
-  g_minute = 0;
+  // Set initial time (this is just for testing)
+  DateTime set(2019, 4, 30, 9, 23, 0);
+  rtc.adjust(set);
 
-  // Count variable: determines when we check for hour/minute
-  // change.  Idea is to avoid unnecessary communication with
-  // the RTC.
+  // Set the time according to the RTC
+  update_time(rtc.now());
 
+/*
   // Add a timer interrupt handler to be fired once per millisecond.
   // See: https://learn.adafruit.com/multi-tasking-the-arduino-part-2/timers
   OCR0A = 0xAF;
   TIMSK0 |= _BV(OCIE0A);
-
-  // Set the time according to the RTC
-  update_time(rtc.now());
+*/
 }
 
 void loop() {
@@ -173,6 +175,8 @@ void loop() {
   uint8_t set_btn_pressed;
   uint8_t hour_btn_pressed;
   uint8_t minute_btn_pressed;
+
+  uint16_t count = 0;
   
   for (;;) {
     /*
@@ -185,9 +189,19 @@ void loop() {
       check_time();
     }
     */
+    /*
     uint16_t tick = g_count;
     if ((tick & 0xFF) == 0) {
       check_time();
     }
+    */
+    if ((count & 0x3F) == 0) {
+      check_time();
+    }
+    if ((count & 0x3) == 0) {
+      update_display();
+    }
+    delay(1);
+    count++;
   }
 }
