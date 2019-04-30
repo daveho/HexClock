@@ -1,5 +1,4 @@
 EESchema Schematic File Version 4
-LIBS:HexClock-cache
 EELAYER 26 0
 EELAYER END
 $Descr USLetter 11000 8500
@@ -944,10 +943,6 @@ Wire Wire Line
 Wire Wire Line
 	3850 3950 4850 3950
 Wire Wire Line
-	3950 4350 3950 6200
-Wire Wire Line
-	3950 6200 3250 6200
-Wire Wire Line
 	3950 4350 4850 4350
 Wire Wire Line
 	3750 4750 3750 3600
@@ -999,7 +994,7 @@ F 3 "" H 3500 3950 50  0001 C CNN
 $EndComp
 Text Label 3550 6000 0    50   ~ 0
 SW1
-Text Label 3550 6200 0    50   ~ 0
+Text Label 1600 4800 0    50   ~ 0
 SW2
 Text Label 1600 4700 0    50   ~ 0
 SW3
@@ -1042,6 +1037,14 @@ F 3 "" H 3350 6950 50  0001 C CNN
 	1    3350 6950
 	1    0    0    -1  
 $EndComp
+Wire Wire Line
+	3950 4350 3950 3500
+Wire Wire Line
+	3950 3500 1400 3500
+Wire Wire Line
+	1400 3500 1400 4800
+Wire Wire Line
+	1400 4800 1850 4800
 Wire Bus Line
 	950  3150 8300 3150
 Wire Bus Line

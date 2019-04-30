@@ -61,8 +61,14 @@ volatile uint8_t g_minute;
 volatile uint16_t g_count;
 */
 
+// Used for timing in the main loop
+uint16_t count = 0;
+
 // The RTC object (from RTClib)
 RTC_DS1307 rtc;
+
+// Debouncing of pushbuttons
+Bounce set_btn, hour_btn, minute_btn;
 
 //**********************************************************************
 // Functions
@@ -162,6 +168,14 @@ void setup() {
   // Set the time according to the RTC
   update_time(rtc.now());
 
+  // Debouncing of pushbuttons
+  set_btn.attach(11, INPUT_PULLUP);
+  set_btn.interval(10);
+  hour_btn.attach(A1, INPUT_PULLUP);
+  hour_btn.interval(10);
+  minute_btn.attach(A0, INPUT_PULLUP);
+  minute_btn.interval(10);
+
 /*
   // Add a timer interrupt handler to be fired once per millisecond.
   // See: https://learn.adafruit.com/multi-tasking-the-arduino-part-2/timers
@@ -171,14 +185,10 @@ void setup() {
 }
 
 void loop() {
-  // Button states
-  uint8_t set_btn_pressed;
-  uint8_t hour_btn_pressed;
-  uint8_t minute_btn_pressed;
-
-  uint16_t count = 0;
+  set_btn.update();
+  hour_btn.update();
+  minute_btn.update();
   
-  for (;;) {
     /*
     // The idea is to wait very close to 1 minute for
     // changes to the hour and minute.  The counter will
@@ -195,13 +205,35 @@ void loop() {
       check_time();
     }
     */
+    
     if ((count & 0x3F) == 0) {
       check_time();
     }
-    if ((count & 0x3) == 0) {
+    
+    if ((count & 0x1) == 0) {
       update_display();
     }
+
+    bool adjust = false;
+    if (hour_btn.fell() && !set_btn.read()) {
+      // Adjust hour
+      g_hour++;
+      if (g_hour >= 24) { g_hour = 0; }
+      adjust = true;
+    }
+    if (minute_btn.fell() && !set_btn.read()) {
+      // Adjust minute
+      g_minute++;
+      if (g_minute >= 60) { g_minute = 0; }
+      adjust = true;
+    }
+    if (adjust) {
+      DateTime cur = rtc.now();
+      DateTime adj(cur.year(), cur.month(), cur.day(), g_hour, g_minute, 0);
+      rtc.adjust(adj);
+    }
+    
     delay(1);
+    
     count++;
-  }
 }
