@@ -17,8 +17,9 @@
 #define SEG_DP (1<<7)
 
 // Bit patterns for hex digits 0-9, A-F.
-// They are negated because the high-side PNP transistors
-// driving the segments are turned on with a low voltage.
+// They are negated because the LED displays are common anode
+// and the segments are turned on with a low voltage applied
+// to the cathodes.
 const uint8_t g_hexfont[16] = {
   (uint8_t) ~(SEG_A|SEG_B|SEG_C|SEG_D|SEG_E|SEG_F),
   (uint8_t) ~(SEG_B|SEG_C),
