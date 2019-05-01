@@ -71,7 +71,7 @@ uint8_t blinker;
 // Functions
 //**********************************************************************
 
-// Update the LED displays based on current hours and minute
+// Update the LED displays based on current hour and minute
 void update_display() {
   static uint8_t update_count;
 
