@@ -2,7 +2,9 @@
 
 This is a somewhat silly project to make a digital clock that displays the current time (hour and minute) in hexadecimal.
 
-Picture of prototype coming soon!
+Here is a picture of the prototype (click to embiggen):
+
+<a href="pic.jpg"><img alt="HexClock prototype" src="pic-sm.jpg"></a>
 
 The [KiCad](http://kicad-pcb.org/) hardware schematic is in the [hw](hw) directory.  The required parts are:
 
