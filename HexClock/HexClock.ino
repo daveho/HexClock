@@ -46,6 +46,9 @@ const uint8_t g_hexfont[16] = {
 // Common anode control pins
 const uint8_t CA_PINS[] = { 8, 9, 10, 12 };
 
+// Timing delay: should be 1 ms
+#define TIMING_DELAY_MS 1
+
 //**********************************************************************
 // Global variables
 //**********************************************************************
@@ -137,11 +140,10 @@ void setup() {
     // Couldn't find RTC?
   }
 
-/*
-  // Set initial time (this is just for testing)
-  DateTime set(2019, 4, 30, 9, 23, 0);
+  // Set initial time, otherwise clock doesn't seem
+  // to start running
+  DateTime set(2019, 5, 15, 0, 0, 0);
   rtc.adjust(set);
-*/
 
   // Set the time according to the RTC
   update_time(rtc.now());
@@ -200,8 +202,8 @@ void loop() {
     rtc.adjust(adj);
   }
 
-  // Delay 1 ms for timing
-  delay(1);
+  // Timing delay
+  delay(TIMING_DELAY_MS);
   
   count++;
 }
