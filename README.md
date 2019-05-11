@@ -16,7 +16,6 @@ The [KiCad](http://kicad-pcb.org/) schematic for the prototype circuit is in the
 * 2 1K pull-up resistors for i2c SDA and SCL lines
 * 7 current limiting resistors for segment cathodes (I used 220 Ohm)
 * 3 normally open pushbutton switches
-* 3V lithium cell (CR2032 or similar) for backup of RTC
 * 5V power supply of some kind
 
 The software is in the [HexClock](HexClock) directory.  It requires the [RTCLib](https://github.com/adafruit/RTClib) and [Bounce2](https://github.com/thomasfredericks/Bounce2) libraries, both of which you can install using the Arduino package manager.
