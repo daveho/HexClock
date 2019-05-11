@@ -267,17 +267,6 @@ Text Label 7000 2350 0    50   ~ 0
 VCC2
 Text Label 7000 1550 0    50   ~ 0
 VCC3
-$Comp
-L Connector_Generic:Conn_02x08_Top_Bottom J1
-U 1 1 5CDBD573
-P 3400 5350
-F 0 "J1" H 3450 5867 50  0000 C CNN
-F 1 "Conn_02x08_Top_Bottom" H 3450 5776 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_2x08_Pitch2.54mm" H 3400 5350 50  0001 C CNN
-F 3 "~" H 3400 5350 50  0001 C CNN
-	1    3400 5350
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	4000 5050 3700 5050
 Wire Wire Line
@@ -366,4 +355,15 @@ Wire Wire Line
 	2000 1550 7250 1550
 Wire Wire Line
 	2000 5750 3200 5750
+$Comp
+L Connector_Generic:Conn_02x08_Odd_Even J1
+U 1 1 5CD74093
+P 3400 5350
+F 0 "J1" H 3450 5867 50  0000 C CNN
+F 1 "Conn_02x08_Odd_Even" H 3450 5776 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_2x08_Pitch2.54mm" H 3400 5350 50  0001 C CNN
+F 3 "~" H 3400 5350 50  0001 C CNN
+	1    3400 5350
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
