@@ -61,23 +61,8 @@ F 3 "" H 5350 7400 50  0001 C CNN
 	1    5350 7400
 	1    0    0    -1  
 $EndComp
-$Comp
-L device:Battery_Cell BT1
-U 1 1 5CC3142E
-P 5700 6150
-F 0 "BT1" V 5955 6200 50  0000 C CNN
-F 1 "Battery_Cell" V 5864 6200 50  0000 C CNN
-F 2 "" V 5700 6210 50  0001 C CNN
-F 3 "" V 5700 6210 50  0001 C CNN
-	1    5700 6150
-	0    -1   -1   0   
-$EndComp
-Wire Wire Line
-	5500 6150 5350 6150
 Wire Wire Line
 	5350 6150 5350 6450
-Wire Wire Line
-	5800 6150 5950 6150
 Wire Wire Line
 	5950 6150 5950 6250
 $Comp
@@ -1033,6 +1018,11 @@ Wire Wire Line
 	1400 4800 1850 4800
 Wire Wire Line
 	3250 4000 3500 4000
+Connection ~ 3500 4000
+Wire Wire Line
+	3500 4000 3500 3850
+Wire Wire Line
+	5350 6150 5950 6150
 Wire Bus Line
 	950  3150 8300 3150
 Wire Bus Line
@@ -1045,7 +1035,4 @@ Wire Bus Line
 	6650 2000 6650 3050
 Wire Bus Line
 	8400 2000 8400 3050
-Connection ~ 3500 4000
-Wire Wire Line
-	3500 4000 3500 3850
 $EndSCHEMATC
