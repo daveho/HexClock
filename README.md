@@ -6,7 +6,7 @@ Here is a picture of the prototype (click to embiggen):
 
 <a href="pic.jpg"><img alt="HexClock prototype" src="pic-sm.jpg"></a>
 
-The [KiCad](http://kicad-pcb.org/) hardware schematic is in the [hw](hw) directory.  The required parts are:
+The [KiCad](http://kicad-pcb.org/) schematic for the prototype circuit is in the [hw\_proto](hw_proto) directory.  The required parts are:
 
 * Arduino Nano
 * DS1307 i2c real time clock chip
