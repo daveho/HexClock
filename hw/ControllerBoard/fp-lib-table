@@ -1,0 +1,5 @@
+(fp_lib_table
+  (lib (name ARDUINO_NANO)(type Legacy)(uri ${KIPRJMOD}/ARDUINO_NANO.mod)(options "")(descr ""))
+  (lib (name TerminalBlock_Phoenix)(type KiCad)(uri ${KIPRJMOD}/TerminalBlock_Phoenix)(options "")(descr ""))
+  (lib (name AB26TRB-32.768KHZ-T)(type Legacy)(uri ${KIPRJMOD}/AB26TRB-32.768KHZ-T.mod)(options "")(descr ""))
+)
