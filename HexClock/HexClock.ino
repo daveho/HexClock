@@ -49,6 +49,23 @@ const uint8_t CA_PINS[] = { 8, 9, 10, 12 };
 // Timing delay: should be 1 ms
 #define TIMING_DELAY_MS 1
 
+// States for when the set button is pressed
+enum {
+  // Set is not pressed
+  SET_NOT_PRESSED=0,
+  // Set is pressed, and hour/minute have not be pressed
+  SET_PRESSED,
+  // Set is pressed, but hour and/or minute buttons have been
+  // pressed to set the time
+  SET_HR_MIN_CHANGED,
+  // Set was pressed for long enough that a mode change occurred,
+  // and now hour/minute changes will be ignored
+  SET_MODE_CHANGED,
+};
+
+// If set is pressed for this many milliseconds, change the display mode
+#define DISPLAY_MODE_CHANGE_MS 3000
+
 //**********************************************************************
 // Global variables
 //**********************************************************************
@@ -69,6 +86,15 @@ Bounce set_btn, hour_btn, minute_btn;
 // State of 2nd display decimal point, which blinks
 // on/off at about .5 Hz.
 uint8_t blinker;
+
+// Display mode: 0=hex, 1=dec
+uint8_t display_mode;
+
+// State associated with set button presses
+uint8_t set_state;
+uint16_t set_count;
+
+// Counter that increments while set is pressed
 
 //**********************************************************************
 // Functions
@@ -106,7 +132,8 @@ void update_display() {
     val = g_minute & 0x0F;
     digitalWrite(CA_PINS[2], HIGH);
     digitalWrite(CA_PINS[3], LOW);
-    DIGIT_OUT = g_hexfont[val];
+    //DIGIT_OUT = g_hexfont[val;
+    DIGIT_OUT = g_hexfont[val] & (display_mode ? ~SEG_DP : 0xFF); // for testing
     break;
   }
   update_count++;
@@ -178,18 +205,43 @@ void loop() {
     update_display();
   }
 
+  // Handle set state
+  if (set_btn.read()) {
+    // Set is not pressed
+    set_state = SET_NOT_PRESSED;
+    set_count = 0;
+  } else {
+    switch (set_state) {
+      case SET_NOT_PRESSED:
+        // Set has just been pressed
+        set_state = SET_PRESSED;
+        break;
+      case SET_PRESSED:
+        // Increment set count
+        set_count++;
+        // If set has been pressed long enough, change display mode
+        if (set_count > DISPLAY_MODE_CHANGE_MS) {
+          display_mode = !display_mode;
+          set_state = SET_MODE_CHANGED;
+        }
+        break;
+    }
+  }
+
+  uint8_t change_time_allowed = (set_state == SET_PRESSED || set_state == SET_HR_MIN_CHANGED);
+
   // Check whether buttons are being used to adjust the time.
   // All buttons are high when not pressed, and low when pressed.
   // The set button must be pressed for the hour and minute
   // adjust buttons to be used.
   bool adjust = false;
-  if (hour_btn.fell() && !set_btn.read()) {
+  if (hour_btn.fell() && change_time_allowed) {
     // Adjust hour
     g_hour++;
     if (g_hour >= 24) { g_hour = 0; }
     adjust = true;
   }
-  if (minute_btn.fell() && !set_btn.read()) {
+  if (minute_btn.fell() && change_time_allowed) {
     // Adjust minute
     g_minute++;
     if (g_minute >= 60) { g_minute = 0; }
@@ -200,6 +252,10 @@ void loop() {
     DateTime cur = rtc.now();
     DateTime adj(cur.year(), cur.month(), cur.day(), g_hour, g_minute, 0);
     rtc.adjust(adj);
+
+    // Set state to SET_HR_MIN_CHANGED (if it was not already):
+    // this ensures that we won't trigger an unintended mode change
+    set_state = SET_HR_MIN_CHANGED;
   }
 
   // Timing delay
