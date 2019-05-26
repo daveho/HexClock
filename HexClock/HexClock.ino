@@ -92,9 +92,12 @@ uint8_t display_mode;
 
 // State associated with set button presses
 uint8_t set_state;
-uint16_t set_count;
 
 // Counter that increments while set is pressed
+uint16_t set_count;
+
+// Display update count (for multiplexing)
+static uint8_t update_count;
 
 //**********************************************************************
 // Functions
@@ -102,8 +105,6 @@ uint16_t set_count;
 
 // Update the LED displays based on current hour and minute
 void update_display() {
-  static uint8_t update_count;
-
   // Each time update_display() is called, one LED display
   // is driven with the appropriate digit (and the other
   // displays are turned off.)
@@ -132,9 +133,56 @@ void update_display() {
     val = g_minute & 0x0F;
     digitalWrite(CA_PINS[2], HIGH);
     digitalWrite(CA_PINS[3], LOW);
-    //DIGIT_OUT = g_hexfont[val;
-    DIGIT_OUT = g_hexfont[val] & (display_mode ? ~SEG_DP : 0xFF); // for testing
+    DIGIT_OUT = g_hexfont[val];
     break;
+  }
+  update_count++;
+}
+
+uint8_t high_digit(uint8_t x) {
+  uint8_t count = 0;
+  while (x >= 10) {
+    count++;
+    x -= 10;
+  }
+  return count;
+}
+
+uint8_t low_digit(uint8_t x) {
+  while (x >= 10) {
+    x -= 10;
+  }
+  return x;
+}
+
+void update_display_dec() {
+  uint8_t which = update_count & 0x3;
+  uint8_t val;
+  switch (which) {
+    case 0:
+      val = high_digit(g_hour);
+      digitalWrite(CA_PINS[3], HIGH);
+      digitalWrite(CA_PINS[0], LOW);
+      DIGIT_OUT = g_hexfont[val];
+      break;
+    case 1:
+      val = low_digit(g_hour);
+      digitalWrite(CA_PINS[0], HIGH);
+      digitalWrite(CA_PINS[1], LOW);
+      DIGIT_OUT = g_hexfont[val] & (blinker ? ~SEG_DP : 0xFF);
+      break;
+    case 2:
+      val = high_digit(g_minute);
+      digitalWrite(CA_PINS[1], HIGH);
+      digitalWrite(CA_PINS[2], LOW);
+      DIGIT_OUT = g_hexfont[val];
+      break;
+    case 3:
+      val = low_digit(g_minute);
+      digitalWrite(CA_PINS[2], HIGH);
+      digitalWrite(CA_PINS[3], LOW);
+      DIGIT_OUT = g_hexfont[val] & ~SEG_DP; // dp of last digit indicates dec mode
+      break;
   }
   update_count++;
 }
@@ -202,7 +250,11 @@ void loop() {
 
   // Refresh display periodically
   if ((count & 0x3) == 0) {
-    update_display();
+    if (display_mode == 0) {
+      update_display();      // hex mode
+    } else {
+      update_display_dec();  // dec mode
+    }
   }
 
   // Handle set state
